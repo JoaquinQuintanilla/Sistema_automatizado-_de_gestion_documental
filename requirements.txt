@@ -4,28 +4,27 @@ uvicorn[standard]
 python-multipart
 pydantic-settings
 
-# Procesamiento de imágenes/OCR
+# OCR y procesamiento de imágenes
 pytesseract
 easyocr
 ocrmypdf
 opencv-python
 pillow
-pydantic-settings
+pdf2image
+pymupdf  # (instala fitz)
 
 # Modelos LLM y NLP
 transformers
-llama-cpp-python
+llama-cpp-python  # si usaras llama.cpp en lugar de Ollama
 sentencepiece
 torch
 
-# Utilidades
+# Utilidades generales
 numpy
 pandas
 requests
 python-dotenv
 scipy
-pymupdf
-pdf2image
 
 # Testing
 pytest

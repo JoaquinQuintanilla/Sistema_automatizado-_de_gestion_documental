@@ -16,7 +16,6 @@ from typing import Union
 
 from app.services.llm.llama3 import Llama3Municipal
 
-
 router = APIRouter()
 
 ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"]
@@ -59,16 +58,28 @@ async def upload_file(file: UploadFile = File(...)):
             logger.info("El archivo será procesado con OCR (Tesseract)")
             ocr = TesseractOCR()
             textos = []
-            for img_path in decision["source"]:
-                texto = ocr.extract_text(img_path)
-                textos.append(texto)
 
-            return JSONResponse(content={
-                "route": "ocr",
-                "ocr_engine": ocr.name,
-                "pages_processed": len(textos),
-                "text": textos
-            })
+            try:
+                for img_path in decision["source"]:
+                    texto = ocr.extract_text(img_path)
+                    textos.append(texto)
+
+                texto_completo = "\n".join(textos)
+
+                llm = Llama3Municipal()
+                resultado = llm.analyze_text(texto_completo)
+
+                return JSONResponse(content={
+                    "route": "ocr+llm",
+                    "ocr_engine": ocr.name,
+                    "llm_engine": llm.name,
+                    "pages_processed": len(textos),
+                    "llm_output": resultado
+                })
+
+            except Exception as e:
+                logger.error(f"Error en flujo OCR → LLaMA: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Fallo el procesamiento con OCR o LLM")
 
         elif decision["route"] == "llm":
             logger.info("El archivo contiene texto embebido. Se procesará con LLaMA 3.2")

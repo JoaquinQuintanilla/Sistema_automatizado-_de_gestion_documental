@@ -25,7 +25,13 @@ class Llama3Municipal(BaseLLM):
 
             output = result.stdout.decode().strip()
 
-            # Intenta parsear el JSON
+            # 🔧 Limpieza de delimitadores tipo Markdown ```json ... ```
+            if output.startswith("```json"):
+                output = output.removeprefix("```json").strip()
+            if output.endswith("```"):
+                output = output.removesuffix("```").strip()
+
+            # ✅ Intenta parsear el JSON limpio
             return json.loads(output)
 
         except json.JSONDecodeError:
@@ -33,4 +39,3 @@ class Llama3Municipal(BaseLLM):
 
         except Exception as e:
             raise RuntimeError(f"Error al ejecutar modelo LLaMA: {str(e)}")
-
