@@ -14,6 +14,8 @@ from app.services.ocr.tesseract import TesseractOCR
 from app.api.schemas import OCRResponse, LLMResponse
 from typing import Union
 
+from app.services.llm.llama3 import Llama3Municipal
+
 
 router = APIRouter()
 
@@ -69,12 +71,28 @@ async def upload_file(file: UploadFile = File(...)):
             })
 
         elif decision["route"] == "llm":
-            logger.info("El archivo contiene texto embebido. Va directo a LLM.")
+            logger.info("El archivo contiene texto embebido. Se procesará con LLaMA 3.2")
+
+            # 1. Obtener texto
+            if isinstance(decision["source"], list):
+                texto = "\n".join(decision["source"])
+            else:
+                texto = decision["source"]
+
+            # 2. Procesar con LLM
+            try:
+                llm = Llama3Municipal()
+                resultado = llm.analyze_text(texto)
+            except Exception as e:
+                logger.error(f"Error al procesar con LLaMA: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Error al ejecutar el modelo de lenguaje")
+
             return JSONResponse(content={
                 "route": "llm",
-                "message": "Documento con texto digital detectado. Listo para análisis con LLM.",
-                "file": file.filename
+                "llm_engine": llm.name,
+                "result": resultado
             })
+
 
     except HTTPException as http_err:
         raise http_err
