@@ -3,22 +3,29 @@ import os
 import uuid
 import tempfile
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from app.core.logger import logger
 from app.core.config import settings
 from app.utils.file_utils import save_upload_file, determine_processing_path
+from app.services.ocr.paddleocr import PaddleOCRService
+from app.services.ocr.easyocr import EasyOCR
 from app.services.ocr.tesseract import TesseractOCR
-
-from app.api.schemas import OCRResponse, LLMResponse
+from app.api.schemas import OCRResponse, LLMResponse, OCREngineEnum, LLMEngineEnum
 from typing import Union
-
 from app.services.llm.llama3 import Llama3Municipal
+from app.services.ocr.donut import DonutOCR
 
 router = APIRouter()
 
 ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"]
+OCR_ENGINES = {
+    "tesseract": TesseractOCR,
+    "easyocr": EasyOCR,
+    "paddleocr": PaddleOCRService,
+    "donut": DonutOCR,
+}
 
 @router.get("/test")
 def test_endpoint():
@@ -26,7 +33,10 @@ def test_endpoint():
     return {"message": "Endpoint de prueba exitoso"}
 
 @router.post("/upload/")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(
+    file: UploadFile = File(...),
+    ocr_engine: OCREngineEnum = Query(default=OCREngineEnum.tesseract)
+):
     tmp_path = None
     try:
         logger.info(f"Inicio de subida: {file.filename} (Tipo: {file.content_type})")
@@ -55,8 +65,12 @@ async def upload_file(file: UploadFile = File(...)):
         decision = determine_processing_path(tmp_path, file.content_type)
 
         if decision["route"] == "ocr":
-            logger.info("El archivo será procesado con OCR (Tesseract)")
-            ocr = TesseractOCR()
+            logger.info(f"El archivo será procesado con OCR ({ocr_engine})")
+            OCRClass = OCR_ENGINES.get(ocr_engine.value)
+            if OCRClass is None:
+                raise HTTPException(status_code=400, detail="OCR engine no soportado")
+
+            ocr = OCRClass()
             textos = []
 
             try:
@@ -64,7 +78,11 @@ async def upload_file(file: UploadFile = File(...)):
                     texto = ocr.extract_text(img_path)
                     textos.append(texto)
 
-                texto_completo = "\n".join(textos)
+                texto_completo = "\n".join(textos).strip()
+
+                if not texto_completo or len(texto_completo) < 30:
+                    logger.warning("[DEBUG] Texto OCR demasiado corto o vacío, se omite paso LLM")
+                    raise HTTPException(status_code=400, detail="El texto extraído por OCR fue insuficiente para análisis con LLM.")
 
                 llm = Llama3Municipal()
                 resultado = llm.analyze_text(texto_completo)
@@ -84,13 +102,8 @@ async def upload_file(file: UploadFile = File(...)):
         elif decision["route"] == "llm":
             logger.info("El archivo contiene texto embebido. Se procesará con LLaMA 3.2")
 
-            # 1. Obtener texto
-            if isinstance(decision["source"], list):
-                texto = "\n".join(decision["source"])
-            else:
-                texto = decision["source"]
+            texto = "\n".join(decision["source"]) if isinstance(decision["source"], list) else decision["source"]
 
-            # 2. Procesar con LLM
             try:
                 llm = Llama3Municipal()
                 resultado = llm.analyze_text(texto)
@@ -103,7 +116,6 @@ async def upload_file(file: UploadFile = File(...)):
                 "llm_engine": llm.name,
                 "result": resultado
             })
-
 
     except HTTPException as http_err:
         raise http_err

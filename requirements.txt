@@ -7,20 +7,26 @@ pydantic-settings
 # OCR y procesamiento de imágenes
 pytesseract
 easyocr
+paddleocr  # Nuevo OCR principal
 ocrmypdf
 opencv-python
 pillow
 pdf2image
 pymupdf  # (instala fitz)
 
+# Donut OCR (opcional, para casos especiales)
+transformers  # requerido por Donut
+sentencepiece  # requerido por Donut
+donut-python  # modelo OCR-free
+
 # Modelos LLM y NLP
-transformers
-llama-cpp-python  # si usaras llama.cpp en lugar de Ollama
-sentencepiece
-torch
+# llama-cpp-python  # (lo dejaste comentado)
+torch==2.2.0
+torchvision==0.17.0
+torchaudio==2.2.0
 
 # Utilidades generales
-numpy
+numpy<2
 pandas
 requests
 python-dotenv
