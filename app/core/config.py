@@ -1,5 +1,5 @@
 # app/core/config.py
-from pydantic_settings import BaseSettings  # Cambio clave aquí
+from pydantic_settings import BaseSettings 
 
 class Settings(BaseSettings):
     APP_NAME: str = "Mi API OCR"

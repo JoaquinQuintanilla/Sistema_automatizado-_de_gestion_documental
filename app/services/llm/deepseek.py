@@ -1,28 +1,25 @@
-# app/services/llm/mistral.py
+# app/services/llm/deepseek.py
 
-from app.services.llm.base_llm import BaseLLM
 import subprocess
 import json
 import re
+from app.services.llm.base_llm import BaseLLM
 
-class MistralMunicipal(BaseLLM):
-    def __init__(self):
-        self.model_name = "mistral-municipal"
-
+class DeepseekMunicipal(BaseLLM):
     @property
     def name(self) -> str:
-        return "Mistral 7B Municipal"
+        return "DeepSeek-Municipal"
 
-    def analyze_text(self, text: str) -> dict:
-        prompt = f"{text}"
+    def analyze_text(self, texto: str) -> dict:
+        prompt = texto.strip()
         try:
             result = subprocess.run(
-                ["ollama", "run", self.model_name],
+                ["ollama", "run", "deepseek-municipal"],
                 input=prompt,
                 text=True,
                 encoding="utf-8",
                 capture_output=True,
-                timeout=120
+                timeout=120,
             )
             output = result.stdout.strip()
 
@@ -32,8 +29,7 @@ class MistralMunicipal(BaseLLM):
 
             if match:
                 json_str = match.group(1)
-                # Limpieza: eliminar comentarios tipo `// ...`
-                json_str = re.sub(r"//.*", "", json_str)
+                json_str = re.sub(r"//.*", "", json_str)  # Eliminar comentarios tipo //
                 return json.loads(json_str)
 
             raise ValueError(f"Respuesta inválida de LLaMA (no es JSON):\n{output}")
@@ -41,4 +37,4 @@ class MistralMunicipal(BaseLLM):
         except json.JSONDecodeError as e:
             raise ValueError(f"Error al decodificar JSON: {e}\nRespuesta:\n{output}")
         except Exception as e:
-            raise RuntimeError(f"Error al ejecutar el modelo {self.model_name}: {str(e)}")
+            raise RuntimeError(f"Error al ejecutar el modelo DeepSeek-Municipal: {str(e)}")

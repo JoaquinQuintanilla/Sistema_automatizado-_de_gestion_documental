@@ -3,11 +3,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from app.core.config import settings
 
-# Configuración mejorada
 logger = logging.getLogger(settings.APP_NAME)
-logger.setLevel(settings.LOG_LEVEL)  # Nivel dinámico desde config
+logger.setLevel(settings.LOG_LEVEL) 
 
-# Formato consistente
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Handlers

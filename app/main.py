@@ -4,7 +4,7 @@ from app.core.logger import logger
 from app.api import endpoints
 
 def create_app() -> FastAPI:
-    """Factory principal de la aplicación (útil para pruebas)."""
+    """Factory principal de la aplicación."""
     app = FastAPI(
         title="API de Procesamiento automatica de documentos",
         version="1.0.0",
@@ -20,7 +20,7 @@ def create_app() -> FastAPI:
 
     @app.get("/", include_in_schema=False)
     async def health_check():
-        """Endpoint de salud (excluido de la documentación)."""
+        """Endpoint de salud."""
         logger.info("Health check solicitado")
         return {"status": "ok", "message": "API operativa"}
 

@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# app/api/endpoints.py
+
 import os
 import uuid
 import tempfile
@@ -9,22 +10,34 @@ from fastapi.responses import JSONResponse
 from app.core.logger import logger
 from app.core.config import settings
 from app.utils.file_utils import save_upload_file, determine_processing_path
-from app.services.ocr.paddleocr import PaddleOCRService
-from app.services.ocr.easyocr import EasyOCR
-from app.services.ocr.tesseract import TesseractOCR
 from app.api.schemas import OCRResponse, LLMResponse, OCREngineEnum, LLMEngineEnum
-from typing import Union
-from app.services.llm.llama3 import Llama3Municipal
+
+from app.services.ocr.tesseract import TesseractOCR
+from app.services.ocr.easyocr import EasyOCR
+from app.services.ocr.paddleocr import PaddleOCRService
 from app.services.ocr.donut import DonutOCR
+
+from app.services.llm.llama3 import Llama3Municipal
+from app.services.llm.deepseek import DeepseekMunicipal
+from app.services.llm.mistral import MistralMunicipal
+from app.services.llm.phi import PhiMunicipal
 
 router = APIRouter()
 
 ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"]
+
 OCR_ENGINES = {
     "tesseract": TesseractOCR,
     "easyocr": EasyOCR,
     "paddleocr": PaddleOCRService,
     "donut": DonutOCR,
+}
+
+LLM_ENGINES = {
+    "llama3": Llama3Municipal,
+    "deepseek": DeepseekMunicipal,
+    "mistral": MistralMunicipal,
+    "phi": PhiMunicipal,
 }
 
 @router.get("/test")
@@ -35,7 +48,8 @@ def test_endpoint():
 @router.post("/upload/")
 async def upload_file(
     file: UploadFile = File(...),
-    ocr_engine: OCREngineEnum = Query(default=OCREngineEnum.tesseract)
+    ocr_engine: OCREngineEnum = Query(default=OCREngineEnum.tesseract),
+    llm_engine: LLMEngineEnum = Query(default=LLMEngineEnum.llama3)
 ):
     tmp_path = None
     try:
@@ -43,19 +57,13 @@ async def upload_file(
 
         if file.content_type not in ALLOWED_TYPES:
             logger.warning(f"Tipo no permitido: {file.content_type}")
-            raise HTTPException(
-                status_code=400,
-                detail=f"Tipo de archivo no soportado. Formatos permitidos: PDF, JPEG, PNG"
-            )
+            raise HTTPException(status_code=400, detail="Tipo de archivo no soportado. Formatos permitidos: PDF, JPEG, PNG")
 
         contents = await file.read()
         file_size_mb = len(contents) / (1024 * 1024)
         if file_size_mb > settings.MAX_FILE_SIZE_MB:
             logger.warning(f"Archivo demasiado grande: {file_size_mb:.2f} MB")
-            raise HTTPException(
-                status_code=400,
-                detail=f"Archivo excede el límite de {settings.MAX_FILE_SIZE_MB} MB"
-            )
+            raise HTTPException(status_code=400, detail=f"Archivo excede el límite de {settings.MAX_FILE_SIZE_MB} MB")
 
         tmp_filename = f"{uuid.uuid4()}_{file.filename}"
         tmp_path = os.path.join(tempfile.gettempdir(), tmp_filename)
@@ -84,7 +92,11 @@ async def upload_file(
                     logger.warning("[DEBUG] Texto OCR demasiado corto o vacío, se omite paso LLM")
                     raise HTTPException(status_code=400, detail="El texto extraído por OCR fue insuficiente para análisis con LLM.")
 
-                llm = Llama3Municipal()
+                LLMClass = LLM_ENGINES.get(llm_engine.value)
+                if LLMClass is None:
+                    raise HTTPException(status_code=400, detail="LLM engine no soportado")
+
+                llm = LLMClass()
                 resultado = llm.analyze_text(texto_completo)
 
                 return JSONResponse(content={
@@ -100,12 +112,16 @@ async def upload_file(
                 raise HTTPException(status_code=500, detail="Fallo el procesamiento con OCR o LLM")
 
         elif decision["route"] == "llm":
-            logger.info("El archivo contiene texto embebido. Se procesará con LLaMA 3.2")
+            logger.info("El archivo contiene texto embebido. Se procesará con LLaMA")
 
             texto = "\n".join(decision["source"]) if isinstance(decision["source"], list) else decision["source"]
 
             try:
-                llm = Llama3Municipal()
+                LLMClass = LLM_ENGINES.get(llm_engine.value)
+                if LLMClass is None:
+                    raise HTTPException(status_code=400, detail="LLM engine no soportado")
+
+                llm = LLMClass()
                 resultado = llm.analyze_text(texto)
             except Exception as e:
                 logger.error(f"Error al procesar con LLaMA: {str(e)}", exc_info=True)
@@ -121,10 +137,7 @@ async def upload_file(
         raise http_err
     except Exception as e:
         logger.error(f"Error inesperado al procesar {file.filename}: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Ocurrió un error interno al procesar el archivo"
-        )
+        raise HTTPException(status_code=500, detail="Ocurrió un error interno al procesar el archivo")
     finally:
         if tmp_path and os.path.exists(tmp_path):
             try:

@@ -1,12 +1,12 @@
 # app/services/ocr/paddleocr.py
 
 from app.services.ocr.base_ocr import BaseOCR
-from paddleocr import PaddleOCR
+from paddleocr import PaddleOCR as PaddleOCRBase
 from PIL import Image
 
 class PaddleOCRService(BaseOCR):
     def __init__(self):
-        self.ocr = PaddleOCR(use_angle_cls=True, lang='es')  # También puedes usar lang='en'
+        self.ocr = PaddleOCRBase(use_angle_cls=True, lang='es')
 
     @property
     def name(self) -> str:

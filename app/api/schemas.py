@@ -13,7 +13,7 @@ class OCREngineEnum(str, Enum):
 
 class LLMEngineEnum(str, Enum):
     llama3 = "llama3"
-    distillama = "distillama"
+    deepseek = "deepseek"
     mistral = "mistral"
     phi = "phi"
 
