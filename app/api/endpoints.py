@@ -3,14 +3,15 @@
 import os
 import uuid
 import tempfile
-import json
+from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from app.core.logger import logger
 from app.core.config import settings
 from app.utils.file_utils import save_upload_file, determine_processing_path
+from app.utils.metrics import medir_uso_recursos
 from app.api.schemas import OCRResponse, LLMResponse, OCREngineEnum, LLMEngineEnum
 
 from app.services.ocr.tesseract import TesseractOCR
@@ -50,7 +51,8 @@ def test_endpoint():
 async def upload_file(
     file: UploadFile = File(...),
     ocr_engine: OCREngineEnum = Query(default=OCREngineEnum.tesseract),
-    llm_engine: LLMEngineEnum = Query(default=LLMEngineEnum.llama3)
+    llm_engine: LLMEngineEnum = Query(default=LLMEngineEnum.llama3),
+    generar_metricas: bool = Query(default=False)
 ):
     tmp_path = None
     try:
@@ -72,6 +74,10 @@ async def upload_file(
         logger.info(f"Archivo guardado temporalmente en: {tmp_path}")
 
         decision = determine_processing_path(tmp_path, file.content_type)
+        base_name = os.path.splitext(os.path.basename(file.filename))[0].replace(" ", "_")
+
+        ocr_metrics = {}
+        llm_metrics = {}
 
         if decision["route"] == "ocr":
             logger.info(f"El archivo será procesado con OCR ({ocr_engine})")
@@ -83,9 +89,16 @@ async def upload_file(
             textos = []
 
             try:
-                for img_path in decision["source"]:
-                    texto = ocr.extract_text(img_path)
-                    textos.append(texto)
+                if generar_metricas:
+                    with medir_uso_recursos() as m_ocr:
+                        for img_path in decision["source"]:
+                            texto = ocr.extract_text(img_path)
+                            textos.append(texto)
+                    ocr_metrics = m_ocr
+                else:
+                    for img_path in decision["source"]:
+                        texto = ocr.extract_text(img_path)
+                        textos.append(texto)
 
                 texto_completo = "\n".join(textos).strip()
 
@@ -98,20 +111,20 @@ async def upload_file(
                     raise HTTPException(status_code=400, detail="LLM engine no soportado")
 
                 llm = LLMClass()
-                resultado = llm.analyze_text(texto_completo)
+                if generar_metricas:
+                    with medir_uso_recursos() as m_llm:
+                        resultado = llm.analyze_text(texto_completo)
+                    llm_metrics = m_llm
+                else:
+                    resultado = llm.analyze_text(texto_completo)
 
-                json_name = os.path.splitext(file.filename)[0].replace(" ", "_") + ".json"
-                with open(json_name, "w", encoding="utf-8") as f:
-                    json.dump(resultado, f, ensure_ascii=False, indent=2)
-
-                return JSONResponse(content={
-                    "output_file": json_name,
+                respuesta = {
                     "route": "ocr+llm",
                     "ocr_engine": ocr.name,
                     "llm_engine": llm.name,
                     "pages_processed": len(textos),
                     "llm_output": resultado
-                })
+                }
 
             except Exception as e:
                 logger.error(f"Error en flujo OCR → LLaMA: {str(e)}", exc_info=True)
@@ -128,22 +141,38 @@ async def upload_file(
                     raise HTTPException(status_code=400, detail="LLM engine no soportado")
 
                 llm = LLMClass()
-                resultado = llm.analyze_text(texto)
+                if generar_metricas:
+                    with medir_uso_recursos() as m_llm:
+                        resultado = llm.analyze_text(texto)
+                    llm_metrics = m_llm
+                else:
+                    resultado = llm.analyze_text(texto)
 
-                json_name = os.path.splitext(file.filename)[0].replace(" ", "_") + ".json"
-                with open(json_name, "w", encoding="utf-8") as f:
-                    json.dump(resultado, f, ensure_ascii=False, indent=2)
-
-                return JSONResponse(content={
-                    "output_file": json_name,
+                respuesta = {
                     "route": "llm",
                     "llm_engine": llm.name,
                     "result": resultado
-                })
+                }
 
             except Exception as e:
                 logger.error(f"Error al procesar con LLaMA: {str(e)}", exc_info=True)
                 raise HTTPException(status_code=500, detail="Error al ejecutar el modelo de lenguaje")
+
+        if generar_metricas:
+            metricas = {
+                "archivo": file.filename,
+                "peso_MB": round(file_size_mb, 2),
+                "ocr_engine": ocr_engine.value,
+                "ocr_metrics": ocr_metrics,
+                "llm_engine": llm_engine.value,
+                "llm_metrics": llm_metrics
+            }
+            return [
+                JSONResponse(content=respuesta),
+                JSONResponse(content=metricas)
+            ]
+
+        return JSONResponse(content=respuesta)
 
     except HTTPException as http_err:
         raise http_err
