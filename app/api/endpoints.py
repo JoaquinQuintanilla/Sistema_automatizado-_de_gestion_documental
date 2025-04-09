@@ -3,6 +3,7 @@
 import os
 import uuid
 import tempfile
+import json
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse
@@ -99,7 +100,12 @@ async def upload_file(
                 llm = LLMClass()
                 resultado = llm.analyze_text(texto_completo)
 
+                json_name = os.path.splitext(file.filename)[0].replace(" ", "_") + ".json"
+                with open(json_name, "w", encoding="utf-8") as f:
+                    json.dump(resultado, f, ensure_ascii=False, indent=2)
+
                 return JSONResponse(content={
+                    "output_file": json_name,
                     "route": "ocr+llm",
                     "ocr_engine": ocr.name,
                     "llm_engine": llm.name,
@@ -123,15 +129,21 @@ async def upload_file(
 
                 llm = LLMClass()
                 resultado = llm.analyze_text(texto)
+
+                json_name = os.path.splitext(file.filename)[0].replace(" ", "_") + ".json"
+                with open(json_name, "w", encoding="utf-8") as f:
+                    json.dump(resultado, f, ensure_ascii=False, indent=2)
+
+                return JSONResponse(content={
+                    "output_file": json_name,
+                    "route": "llm",
+                    "llm_engine": llm.name,
+                    "result": resultado
+                })
+
             except Exception as e:
                 logger.error(f"Error al procesar con LLaMA: {str(e)}", exc_info=True)
                 raise HTTPException(status_code=500, detail="Error al ejecutar el modelo de lenguaje")
-
-            return JSONResponse(content={
-                "route": "llm",
-                "llm_engine": llm.name,
-                "result": resultado
-            })
 
     except HTTPException as http_err:
         raise http_err
