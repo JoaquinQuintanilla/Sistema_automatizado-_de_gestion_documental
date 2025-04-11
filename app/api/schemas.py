@@ -8,14 +8,13 @@ class OCREngineEnum(str, Enum):
     tesseract = "tesseract"
     easyocr = "easyocr"
     paddleocr = "paddleocr"
-    donut = "donut"
-
 
 class LLMEngineEnum(str, Enum):
     llama3 = "llama3"
     deepseek = "deepseek"
     mistral = "mistral"
-    phi = "phi"
+    qwem = "qwen"
+    gemma = "gemma"
 
 
 class OCRResponse(BaseModel):

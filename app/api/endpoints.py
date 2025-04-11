@@ -17,12 +17,12 @@ from app.api.schemas import OCRResponse, LLMResponse, OCREngineEnum, LLMEngineEn
 from app.services.ocr.tesseract import TesseractOCR
 from app.services.ocr.easyocr import EasyOCR
 from app.services.ocr.paddleocr import PaddleOCRService
-from app.services.ocr.donut import DonutOCR
 
 from app.services.llm.llama3 import Llama3Municipal
 from app.services.llm.deepseek import DeepseekMunicipal
 from app.services.llm.mistral import MistralMunicipal
-from app.services.llm.phi import PhiMunicipal
+from app.services.llm.qwen import QwenMunicipal
+from app.services.llm.gemma import GemmaMunicipal
 
 router = APIRouter()
 
@@ -32,14 +32,14 @@ OCR_ENGINES = {
     "tesseract": TesseractOCR,
     "easyocr": EasyOCR,
     "paddleocr": PaddleOCRService,
-    "donut": DonutOCR,
 }
 
 LLM_ENGINES = {
     "llama3": Llama3Municipal,
     "deepseek": DeepseekMunicipal,
     "mistral": MistralMunicipal,
-    "phi": PhiMunicipal,
+    "qwen": QwenMunicipal,
+    "gemma": GemmaMunicipal,
 }
 
 @router.get("/test")

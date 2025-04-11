@@ -20,7 +20,7 @@ class Llama3Municipal(BaseLLM):
                 text=True,
                 encoding="utf-8",
                 capture_output=True,
-                timeout=120
+                timeout=300
             )
 
             output = result.stdout.strip()
