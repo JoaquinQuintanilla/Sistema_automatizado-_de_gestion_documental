@@ -9,7 +9,7 @@ El sistema permite digitalizar, clasificar y extraer información clave de docum
 ## Tecnologías Utilizadas
 
 - **Framework API**: FastAPI  
-- **OCR**: Tesseract, EasyOCR, PaddleOCR, Donut (opcional)  
+- **OCR**: Tesseract, EasyOCR, PaddleOCR
 - **LLMs**: LLaMA 3, Mistral, DeepSeek, Qwen, Gemma  
 - **Gestor de Dependencias**: pip / virtualenv  
 - **Control de Versiones**: Git  
@@ -57,15 +57,15 @@ uvicorn app.main:app --reload
 
 Se evaluaron 15 combinaciones posibles de OCR y LLM utilizando más de **9,000 documentos municipales**. A partir de los resultados recolectados se concluyó que:
 
-- 🔍 El **OCR más eficiente y preciso** es **PaddleOCR**, tanto en uso de CPU como en tiempo de ejecución.
-- 🧠 Los **LLMs más eficientes en tiempo y precisión** son **LLaMA 3.2 (3B)** y **Qwen2.5 (3B)**.
-- 🏆 Las **combinaciones más rápidas** y con buen rendimiento global fueron:
+-  El **OCR más eficiente y preciso** es **PaddleOCR**, tanto en uso de CPU como en tiempo de ejecución.
+-  Los **LLMs más eficientes en tiempo y precisión** son **LLaMA 3.2 (3B)** y **Qwen2.5 (3B)**.
+-  Las **combinaciones más rápidas** y con buen rendimiento global fueron:
   - `paddleocr_llama3`
   - `paddleocr_qwen`
 
 Además, se evaluó la capacidad de cada LLM para extraer clasificadores desde los documentos municipales, con un promedio de más de **13 clasificadores por documento** en los mejores modelos.
 
-📊 Para visualizar los resultados en detalle, consulta: [`README_graficos.md`](./resultados/graficos/README_graficos.md)
+Para visualizar los resultados en detalle, consulta: [`README_graficos.md`](./resultados/graficos/README_graficos.md)
 
 ---
 
