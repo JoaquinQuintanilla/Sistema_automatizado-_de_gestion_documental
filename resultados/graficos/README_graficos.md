@@ -58,4 +58,4 @@ Este documento contiene los **gráficos comparativos generados durante la fase d
 
 ---
 
-Cada uno de estos gráficos fue generado a partir de un análisis automatizado sobre 9,000 documentos utilizando FastAPI + Ollama, midiendo rendimiento, eficiencia y calidad de extracción de metadatos estructurados.
+Cada uno de estos gráficos fue generado a partir de un análisis automatizado sobre 3000 documentos utilizando FastAPI + Ollama, midiendo rendimiento, eficiencia y calidad de extracción de metadatos estructurados.

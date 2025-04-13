@@ -55,7 +55,7 @@ uvicorn app.main:app --reload
 
 ## Resultados y Evaluación
 
-Se evaluaron 15 combinaciones posibles de OCR y LLM utilizando más de **9,000 documentos municipales**. A partir de los resultados recolectados se concluyó que:
+Se evaluaron 15 combinaciones posibles de OCR y LLM utilizando más de **3000 documentos municipales**. A partir de los resultados recolectados se concluyó que:
 
 -  El **OCR más eficiente y preciso** es **PaddleOCR**, tanto en uso de CPU como en tiempo de ejecución.
 -  Los **LLMs más eficientes en tiempo y precisión** son **LLaMA 3.2 (3B)** y **Qwen2.5 (3B)**.
