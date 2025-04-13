@@ -1,93 +1,81 @@
-
 # Proyecto de Título - Sistema Automatizado de Gestión Documental
 
 ## Descripción
-Este proyecto implementa un **sistema automatizado de gestión documental** para la Municipalidad de Valparaíso, utilizando **inteligcia artificial**.
 
-El sistema permite digitalizar, clasificar y extraer información clave de documentos municipales mediante modelos avanzados de **OCR** y **modelos de lenguaje a gran escala (LLMs)**. La solución se expone a través de una **API REST**, generando resultados en formato JSON para garantizar interoperabilidad.
+Este proyecto implementa un **sistema automatizado de gestión documental** para la Municipalidad de Valparaíso, utilizando técnicas de **inteligencia artificial**.
+
+El sistema permite digitalizar, clasificar y extraer información clave de documentos municipales mediante modelos avanzados de **OCR** y **modelos de lenguaje a gran escala (LLMs)**. La solución se expone a través de una **API REST**, generando resultados en formato JSON estructurado, cumpliendo con la Ley 21.180 sobre Transformación Digital del Estado.
 
 ## Tecnologías Utilizadas
-- **Framework API**: FastAPI
-- **OCR**: Tesseract, EasyOCR, PaddleOCR, Donut (opcional)
-- **LLMs**: LLaMA 3, DistilLLaMA, Mistral, Phi
-- **Gestor de Dependencias**: pip / virtualenv
-- **Control de Versiones**: Git
-- **Metodología**: Scrum
-- **Motor de LLMs local**: Ollama + modelo personalizado `llama3.2-municipal`
+
+- **Framework API**: FastAPI  
+- **OCR**: Tesseract, EasyOCR, PaddleOCR, Donut (opcional)  
+- **LLMs**: LLaMA 3, Mistral, DeepSeek, Qwen, Gemma  
+- **Gestor de Dependencias**: pip / virtualenv  
+- **Control de Versiones**: Git  
+- **Motor de LLMs local**: Ollama  
+- **Metodología**: Scrum  
 
 ## Estructura del Proyecto
+
 ```
 proyecto_titulo/
 ├── app/
-│   ├── api/
-│   │   ├── endpoints.py        # Endpoints de la API REST
-│   │   ├── schemas.py          # Modelos de datos con Pydantic
-│   ├── core/
-│   │   ├── config.py           # Configuración global
-│   │   ├── logger.py           # Registro de logs
-│   ├── services/
-│   │   ├── ocr/
-│   │   │   ├── base_ocr.py     # Clase base para OCR
-│   │   │   ├── tesseract.py    # OCR con Tesseract
-│   │   │   ├── easyocr.py      # OCR con EasyOCR
-│   │   │   ├── paddleocr.py    # OCR con PaddleOCR
-│   │   │   ├── donut.py        # OCR con Donut (opcional)
-│   │   ├── llm/
-│   │   │   ├── base_llm.py     # Clase base para LLMs
-│   │   │   ├── llama3.py       # Modelo LLaMA 3 personalizado (Ollama)
-│   │   │   ├── distil_llama.py # Versión ligera de LLaMA
-│   │   │   ├── mistral.py      # Modelo Mistral
-│   │   │   ├── phi.py          # Modelo Phi
-│   ├── utils/
-│   │   ├── file_utils.py       # Utilidades para manejo de archivos
-│   │   ├── metrics.py          # Evaluación del rendimiento
-├── models/
-│   ├── llama3.2-municipal/
-│   │   ├── Modelfile           # Configuración personalizada del modelo LLaMA
-├── tests/                      # Pruebas unitarias
-├── requirements.txt            # Dependencias del proyecto
-├── README.md                   # Documentación
-├── .gitignore                  # Archivos a ignorar en Git
+│   ├── api/               # Endpoints y modelos de entrada/salida
+│   ├── core/              # Configuraciones y logger
+│   ├── services/          # Implementación de OCRs y LLMs
+│   └── utils/             # Métricas y utilidades
+├── models/                # Archivos de configuración de modelos Ollama
+├── tests/                 # Pruebas unitarias
+├── resultados/graficos/  # Visualizaciones generadas por Jupyter
+├── requirements.txt
+├── README.md
+└── .gitignore
 ```
 
 ## Instalación y Configuración
-1. Clonar el repositorio:
-   ```sh
-   git clone https://github.com/usuario/proyecto_titulo.git
-   cd proyecto_titulo
-   ```
-2. Crear y activar un entorno virtual:
-   ```sh
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate  # Windows
-   ```
-3. Instalar dependencias:
-   ```sh
-   pip install -r requirements.txt
-   ```
-4. Configurar variables de entorno en `app/core/config.py` o mediante un archivo `.env`.
 
-## Uso
-Ejecutar la API con FastAPI:
-```sh
+```bash
+git clone https://github.com/usuario/proyecto_titulo.git
+cd proyecto_titulo
+python -m venv venv
+source venv/bin/activate  # O venv\Scripts\activate en Windows
+pip install -r requirements.txt
+```
+
+## Ejecución
+
+```bash
 uvicorn app.main:app --reload
 ```
-La documentación de la API estará disponible en:
-- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-## LLM personalizado con Ollama
-Para construir el modelo `llama3.2-municipal` utilizado por el sistema:
+- Documentación Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-```sh
+---
+
+## Resultados y Evaluación
+
+Se evaluaron 15 combinaciones posibles de OCR y LLM utilizando más de **9,000 documentos municipales**. A partir de los resultados recolectados se concluyó que:
+
+- 🔍 El **OCR más eficiente y preciso** es **PaddleOCR**, tanto en uso de CPU como en tiempo de ejecución.
+- 🧠 Los **LLMs más eficientes en tiempo y precisión** son **LLaMA 3.2 (3B)** y **Qwen2.5 (3B)**.
+- 🏆 Las **combinaciones más rápidas** y con buen rendimiento global fueron:
+  - `paddleocr_llama3`
+  - `paddleocr_qwen`
+
+Además, se evaluó la capacidad de cada LLM para extraer clasificadores desde los documentos municipales, con un promedio de más de **13 clasificadores por documento** en los mejores modelos.
+
+📊 Para visualizar los resultados en detalle, consulta: [`README_graficos.md`](./resultados/graficos/README_graficos.md)
+
+---
+
+## Construcción del Modelo LLaMA Municipal
+
+```bash
 cd models/llama3.2-municipal
 ollama create llama3.2-municipal -f Modelfile
-```
-
-Luego puedes probarlo manualmente con:
-```sh
 ollama run llama3.2-municipal
 ```
 
-Este modelo ha sido afinado con un prompt especializado para extraer metadatos estructurados desde documentos municipales en español, cumpliendo con la normativa chilena vigente.
+Este modelo personalizado fue optimizado para extraer metadatos estructurados desde documentos administrativos municipales en español.
+
