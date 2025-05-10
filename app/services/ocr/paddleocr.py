@@ -17,8 +17,16 @@ class PaddleOCRService(BaseOCR):
         result = self.ocr.ocr(image_path, cls=True)
         textos = []
 
+        if not result:
+            return ""
+
         for line in result:
-            for (_, text_info) in line:
+            if not line:
+                continue
+            for item in line:
+                if not item or len(item) < 2:
+                    continue
+                _, text_info = item
                 texto = text_info[0]
                 textos.append(texto)
 

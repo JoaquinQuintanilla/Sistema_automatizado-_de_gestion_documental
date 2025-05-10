@@ -5,16 +5,11 @@ from enum import Enum
 
 
 class OCREngineEnum(str, Enum):
-    tesseract = "tesseract"
-    easyocr = "easyocr"
     paddleocr = "paddleocr"
 
 class LLMEngineEnum(str, Enum):
-    llama3 = "llama3"
-    deepseek = "deepseek"
-    mistral = "mistral"
+    llama = "llama"
     qwem = "qwen"
-    gemma = "gemma"
 
 
 class OCRResponse(BaseModel):
