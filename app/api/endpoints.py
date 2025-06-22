@@ -14,32 +14,22 @@ from app.utils.file_utils import save_upload_file, determine_processing_path
 from app.utils.metrics import medir_uso_recursos
 from app.api.schemas import OCRResponse, LLMResponse, OCREngineEnum, LLMEngineEnum
 
-from app.services.ocr.tesseract import TesseractOCR
-from app.services.ocr.easyocr import EasyOCR
 from app.services.ocr.paddleocr import PaddleOCRService
 
-from app.services.llm.llama3 import Llama3Municipal
-from app.services.llm.deepseek import DeepseekMunicipal
-from app.services.llm.mistral import MistralMunicipal
+from app.services.llm.llama import LlamaMunicipal
 from app.services.llm.qwen import QwenMunicipal
-from app.services.llm.gemma import GemmaMunicipal
 
 router = APIRouter()
 
 ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"]
 
 OCR_ENGINES = {
-    "tesseract": TesseractOCR,
-    "easyocr": EasyOCR,
     "paddleocr": PaddleOCRService,
 }
 
 LLM_ENGINES = {
-    "llama3": Llama3Municipal,
-    "deepseek": DeepseekMunicipal,
-    "mistral": MistralMunicipal,
+    "llama": LlamaMunicipal,
     "qwen": QwenMunicipal,
-    "gemma": GemmaMunicipal,
 }
 
 @router.get("/test")
@@ -50,8 +40,8 @@ def test_endpoint():
 @router.post("/upload/")
 async def upload_file(
     file: UploadFile = File(...),
-    ocr_engine: OCREngineEnum = Query(default=OCREngineEnum.tesseract),
-    llm_engine: LLMEngineEnum = Query(default=LLMEngineEnum.llama3),
+    ocr_engine: OCREngineEnum = Query(default=OCREngineEnum.paddleocr),
+    llm_engine: LLMEngineEnum = Query(default=LLMEngineEnum.llama),
     generar_metricas: bool = Query(default=False)
 ):
     tmp_path = None

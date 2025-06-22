@@ -1,19 +1,16 @@
-# app/services/llm/qwen.py
+# app/services/llm/llama3.py
 
 import subprocess
 from app.services.llm.base_llm import BaseLLM
 
-class QwenMunicipal(BaseLLM):
-    def __init__(self):
-        self.model_name = "qwen-municipal"
-
+class LlamaMunicipal(BaseLLM):
     @property
     def name(self) -> str:
-        return "Qwen Municipal"
+        return "LLaMA Municipal"
 
     def _call_model(self, texto: str) -> str:
         result = subprocess.run(
-            ["ollama", "run", self.model_name],
+            ["ollama", "run", "llama-municipal"],
             input=texto,
             text=True,
             encoding="utf-8",
