@@ -1,38 +1,41 @@
-# Framework web
+# Web y API
 fastapi
 uvicorn[standard]
 python-multipart
 pydantic-settings
 
-# OCR y procesamiento de imágenes
+# OCRs
 pytesseract
 easyocr
-paddleocr
-paddlepaddle 
+paddleocr==2.6.1.3
+paddlepaddle==2.6.2
 ocrmypdf
+pdfminer.six
+
+# PDF e imágenes
 opencv-python
 pillow
 pdf2image
-pymupdf  # (instala fitz)
+pymupdf  # para usar 'import fitz'
 
-# Donut OCR (opcional, para casos especiales)
-transformers>=4.36.2  # Versión estable que funciona bien con Donut y HF Hub
-sentencepiece  # requerido por Donut
-donut-python  # modelo OCR-free
+# Donut OCR (opcional)
+transformers>=4.36.2
+sentencepiece
+donut-python
 
-# Modelos LLM y NLP 
+# Modelos LLM y utilidades
 torch==2.2.0
 torchvision==0.17.0
 torchaudio==2.2.0
 
-# Utilidades generales
-numpy<2  
+# Análisis y métricas
+psutil
+GPUtil
+numpy<2
 pandas
+scipy
 requests
 python-dotenv
-scipy
-psutil
-gputil
 
 # Testing
 pytest

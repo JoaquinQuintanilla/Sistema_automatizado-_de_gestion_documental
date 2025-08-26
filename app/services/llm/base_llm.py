@@ -37,38 +37,36 @@ class BaseLLM(ABC):
 
     def _extract_json(self, output: str) -> dict:
         """
-        Extrae y limpia el bloque JSON desde una respuesta de modelo LLM.
-
-        Args:
-            output (str): Texto crudo del modelo.
-
-        Returns:
-            dict: JSON válido como diccionario.
+        Extrae y limpia el bloque JSON desde una respuesta de modelo LLM, ignorando texto adicional.
         """
+        # Busca bloque dentro de ```json ... ```
         match = re.search(r"```json\s*(\{.*?\})\s*```", output, re.DOTALL)
+        
+        # Si no hay bloque marcado, busca cualquier bloque JSON
         if not match:
-            match = re.search(r"(\{.*\})", output, re.DOTALL)
+            match = re.search(r"\{.*\}", output, re.DOTALL)
 
         if not match:
             raise ValueError(f"Respuesta inválida del modelo (no contiene JSON):\n{output}")
 
-        json_text = match.group(1)
+        json_text = match.group(0)
 
-        # Arregla comillas escapadas
+        # Limpiezas comunes
         json_text = json_text.replace('\\"', '"')
-
-        # Agrega llave de cierre si falta
-        if json_text.count("{") > json_text.count("}"):
-            json_text += "}"
-
-        # Elimina barras innecesarias mal escapadas
         json_text = re.sub(r'(?<!\\)\\(?!["\\/bfnrtu])', '', json_text)
+
+        # Cierre de estructuras incompletas
+        while json_text.count("{") > json_text.count("}"):
+            json_text += "}"
+        while json_text.count("[") > json_text.count("]"):
+            json_text += "]"
 
         try:
             parsed = json.loads(json_text)
             return self._try_parse_json_strings(parsed)
         except json.JSONDecodeError as e:
             raise ValueError(f"Error al decodificar JSON: {e}\nRespuesta:\n{output}")
+
 
     def _try_parse_json_strings(self, obj):
         """
