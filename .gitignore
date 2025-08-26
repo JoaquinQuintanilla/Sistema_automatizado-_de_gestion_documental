@@ -35,7 +35,6 @@ env/
 *.jpg
 *.png
 data/
-models/
 .ollama/
 
 # Archivos de entorno
