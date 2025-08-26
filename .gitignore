@@ -33,7 +33,6 @@ env/
 # Datos y modelos
 *.pdf
 *.jpg
-*.png
 data/
 .ollama/
 
