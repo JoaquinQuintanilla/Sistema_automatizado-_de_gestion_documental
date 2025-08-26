@@ -97,7 +97,7 @@ Durante la validación se procesaron más de **3000 documentos municipales**, ev
 
 El detalle completo de las métricas y gráficos está en:
 
-* resultados/graficos/README_graficos.md
+- [Resultados completos de gráficos](./resultados/graficos/README_graficos.md)
 
 ## Estado del proyecto
 
