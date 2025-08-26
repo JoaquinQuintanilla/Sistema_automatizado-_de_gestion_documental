@@ -22,15 +22,15 @@ La solución permite **digitalizar, clasificar y extraer metadatos clave** desde
 
 **Vista general de la solución y artefactos finales**
 
-![Diagrama de solución](./resultados/graficos/diagrama_solucion.png)
+![Diagrama de solución](./resultados/diagrama_solucion.png)
 
 **Diagrama de bajo nivel (flujo técnico)**
 
-![Diagrama de bajo nivel](./resultados/graficos/diagrama_bajo_nivel.png)
+![Diagrama de bajo nivel](./resultados/diagrama_bajo_nivel.png)
 
 **Resumen final (síntesis de resultados)**
 
-![Resumen final](./resultados/graficos/resumen_final.png)
+![Resumen final](./resultados/resumen_final.png)
 
 ## Estructura del Proyecto
 
@@ -73,8 +73,6 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Documentación interactiva: [http://localhost:8000/docs](http://localhost:8000/docs)
-
 ## Modelo LLaMA Municipal (Ollama)
 
 El repositorio incluye un **Modelfile** personalizado para LLaMA.
@@ -99,7 +97,7 @@ Durante la validación se procesaron más de **3000 documentos municipales**, ev
 
 El detalle completo de las métricas y gráficos está en:
 
-* `resultados/graficos/README_graficos.md`
+* resultados/graficos/README_graficos.md
 
 ## Estado del proyecto
 
