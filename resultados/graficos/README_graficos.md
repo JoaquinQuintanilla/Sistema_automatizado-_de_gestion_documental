@@ -1,110 +1,123 @@
 ### resultados/graficos/README\_graficos.md
 
-# Resultados Visuales del Proyecto
+# Resultados, Validación e Implantación
 
-Este documento reúne los **gráficos de la fase experimental** donde se evaluaron motores **OCR**, **LLMs** y sus combinaciones, sobre más de **3000 documentos municipales**. Se midieron **tiempos de ejecución**, **uso de recursos** y **calidad de extracción** de clasificadores.
-
-## Índice
-
-1. Arquitectura y síntesis de resultados
-2. Métricas de calidad (clasificadores, precisión y similitud)
-3. Rendimiento y tiempos
-4. Consumo de recursos (CPU/GPU/VRAM)
-5. Conclusiones
+Este documento resume los resultados de la etapa experimental y de validación del sistema automatizado de gestión documental. Se incluyen los hallazgos principales en términos de métricas de desempeño (tiempos, uso de recursos, extracción de clasificadores), así como los análisis de validación en distintos entornos computacionales e institucionales. Finalmente, se presentan observaciones sobre la implantación práctica del sistema.
 
 ---
 
-## 1. Arquitectura y síntesis de resultados
+## 1. Resultados del sistema base
 
-* Diagrama de solución:
-  ![Diagrama de solución](./diagrama_solucion.png)
-* Diagrama de bajo nivel:
-  ![Diagrama de bajo nivel](./diagrama_bajo_nivel.png)
-* Resumen final:
-  ![Resumen final](./resumen_final.png)
+### 1.1 Motores OCR
+
+* Tiempo promedio por motor OCR:
+  ![Tiempo OCR](./tiempo_promedio_ocr.png)
+* Uso promedio de CPU:
+  ![CPU OCR](./uso_promedio_cpu_ocr.png)
+
+**Conclusión:** PaddleOCR fue el motor más robusto frente a documentos escaneados con baja calidad, aunque con mayor consumo de CPU.
+
+### 1.2 Modelos LLM
+
+* Tiempo promedio por modelo:
+  ![Tiempo LLM](./tiempo_promedio_ejecucion_llm.png)
+* Uso promedio de GPU:
+  ![GPU LLM](./uso_promedio_gpu_llm.png)
+* Uso promedio de VRAM:
+  ![VRAM LLM](./uso_promedio_vram_llm.png)
+* Promedio de clasificadores por documento:
+  ![Promedio clasificadores](./promedio_llaves_llm.png)
+* Porcentaje de documentos con clasificadores frecuentes:
+  ![Clasificadores frecuentes](./porcentaje_clasificadores_llm.png)
+
+**Conclusión:** LLaMA y Qwen mostraron el mejor equilibrio entre eficiencia y precisión. LLaMA destacó por menor consumo de VRAM.
+
+### 1.3 Combinaciones OCR + LLM
+
+* Tiempo total por combinación:
+  ![Tiempo combinación](./tiempo_total_promedio_combinacion.png)
+
+**Conclusión:** PaddleOCR con LLaMA o Qwen ofrecieron el mejor balance global.
 
 ---
 
-## 2. Métricas de calidad
+## 2. Comparación modelos base vs fine-tuned
 
-**Cobertura y éxito por modelo**
+* Uso de GPU:
+  ![Uso GPU comparación](./uso_gpu_comparacion.png)
+* Uso de VRAM:
+  ![Uso VRAM comparación](./vram_comparacion.png)
+* Tiempo promedio:
+  ![Tiempo comparación](./Tiempo_promedio_comparacion.png)
+* Tiempo total:
+  ![Tiempo total comparación](./tiempo_total_comparacion.png)
+* Clasificadores promedio:
+  ![Clasificadores comparación](./cantidad_llaves_comparacion.png)
 
-* Documentos procesados con éxito por LLM:
-  ![Éxito por LLM](./cantidad_documentos_exito_llm.png)
-* Clasificadores frecuentes (porcentaje de documentos con llaves):
-  ![Porcentaje clasificadores](./porcentaje_clasificadores_llm.png)
-* Promedio de clasificadores por documento (por LLM):
-  ![Promedio de llaves por LLM](./promedio_llaves_llm.png)
-* Comparación de cantidad de llaves:
-  ![Cantidad llaves comparación](./cantidad_llaves_comparacion.png)
-* Clasificadores por municipalidad y promedios:
+**Conclusión:** El fine-tuning entregó mejoras marginales en estandarización, pero no justificó el costo. Los modelos base con prompts fueron más flexibles y relevantes.
+
+---
+
+## 3. Validación del sistema
+
+### 3.1 Portabilidad técnica
+
+Ejecución en distintos equipos:
+
+* Distribución de tiempos por GPU:
+  ![Distribución de tiempos](./distribucion_tiempos_pcs.png)
+* Evolución de tiempos por documento:
+  ![Tiempos documentos](./tiempos_pordocumentos.png)
+* Uso GPU por equipo:
+  ![GPU PCs](./gpu_pcs.png)
+* Uso VRAM por equipo:
+  ![VRAM PCs](./vram_pcs.png)
+* Clasificadores promedio por GPU:
+  ![Promedios clasificadores GPU](./llaves_promedios_pcs.png)
+
+**Conclusión:** El sistema fue portable y mantuvo resultados equivalentes en RTX 4060 y A4000, con mejor desempeño en la A4000.
+
+### 3.2 Adaptabilidad institucional
+
+Aplicación en documentos de Viña del Mar:
+
+* Promedio de clasificadores por municipalidad:
   ![Clasificadores munis](./clasificadores_munis.png)
+* Presencia de clasificadores frecuentes:
   ![Promedios clasificadores munis](./promedios_clasificadores_munis.png)
 
-**Calidad de extracción (validación)**
+**Conclusión:** El sistema mantuvo rendimiento consistente sin necesidad de ajustes específicos, confirmando su reutilización en distintos municipios.
 
+### 3.3 Validación con datos reales (Las Condes)
+
+* Errores por campo:
+  ![Errores](./errores_vacios.png)
 * Precisión exacta:
   ![Precisión exacta](./precision_exacta.png)
-* Similitud exacta y fuzzy:
-  ![Similitud exacta](./similitud_exacta.png)
+* Similitud fuzzy:
   ![Similitud fuzzy](./similitud_fuzzy.png)
-* Errores y vacíos detectados:
-  ![Errores/ vacíos](./errores_vacios.png)
 
-**Interpretación breve**
-
-* LLaMA 3.2 Municipal y Qwen 2.5 entregan mayor estabilidad en la cantidad de clasificadores y precisión.
-* La variabilidad por municipalidad sugiere que **prompting específico por tipo de documento** mejora resultados.
+**Conclusión:** Alta precisión en campos estructurados y enriquecimiento con metadatos adicionales, facilitando interoperabilidad.
 
 ---
 
-## 3. Rendimiento y tiempos
+## 4. Implantación del sistema
 
-* Tiempo promedio de ejecución por LLM:
-  ![Tiempo LLM](./tiempo_promedio_ejecucion_llm.png)
-* Tiempo promedio de ejecución por OCR:
-  ![Tiempo OCR](./tiempo_promedio_ocr.png)
-* Tiempo total promedio por combinación OCR + LLM:
-  ![Tiempo combinación](./tiempo_total_promedio_combinacion.png)
-* Comparaciones adicionales de tiempo (por PC / global):
-  ![Tiempo promedio comparación](./Tiempo_promedio_comparacion.png)
-  ![Tiempo LLM por PC](./Tiempo_promedio_llm_pcs.png)
-  ![Tiempo total comparación](./tiempo_total_comparacion.png)
-  ![Tiempos por documento](./tiempos_pordocumentos.png)
-  ![Distribución de tiempos por PC](./distribucion_tiempos_pcs.png)
+Durante la etapa de implantación, se definieron los requisitos mínimos y recomendados:
 
-**Interpretación breve**
+* **Requisitos mínimos:** GPU con 6 GB VRAM, procesador de 4 núcleos, 8 GB RAM.
+* **Requisitos recomendados:** GPU de gama media-alta (ej. RTX A4000), procesador de 8 núcleos, 32 GB RAM.
 
-* PaddleOCR es consistentemente el **más rápido**.
-* Las combinaciones con LLaMA 3.2 y Qwen 2.5 logran **mejor tiempo total** sin sacrificar calidad.
+Se ejecutaron pruebas de instalación y despliegue en entornos locales, documentando el proceso y verificando compatibilidad con dependencias (FastAPI, Ollama, OCRs). Los gráficos de desempeño confirmaron que la infraestructura recomendada garantiza tiempos óptimos.
 
 ---
 
-## 4. Consumo de recursos
+## 5. Conclusión general
 
-* Uso promedio de CPU por OCR:
-  ![CPU OCR](./uso_promedio_cpu_ocr.png)
-* Uso promedio de GPU por LLM:
-  ![GPU LLM](./uso_promedio_gpu_llm.png)
-* Uso promedio de VRAM por LLM:
-  ![VRAM LLM](./uso_promedio_vram_llm.png)
-* Comparaciones por equipo (GPU/VRAM):
-  ![GPU PCs](./gpu_pcs.png)
-  ![VRAM PCs](./vram_pcs.png)
-  ![Uso GPU comparación](./uso_gpu_comparacion.png)
-  ![VRAM comparación](./vram_comparacion.png)
-  ![Llaves promedios por PC](./llaves_promedios_pcs.png)
+* **OCR ganador:** PaddleOCR.
+* **LLM preferido:** LLaMA 3.2 Municipal, con Qwen como alternativa.
+* **Mejor combinación:** PaddleOCR + LLaMA.
+* **Validación:** El sistema fue portable, adaptable y preciso en distintos contextos municipales.
+* **Implantación:** Requisitos técnicos claros y comprobación en entornos reales.
 
-**Interpretación breve**
-
-* El **consumo de VRAM** de LLaMA 3.2 y Qwen 2.5 se mantiene dentro de rangos eficientes para GPUs de rango medio.
-* PaddleOCR presenta **bajo uso de CPU** en comparación con alternativas.
-
----
-
-## 5. Conclusiones
-
-* **OCR ganador**: PaddleOCR (velocidad y estabilidad).
-* **LLMs recomendados**: LLaMA 3.2 Municipal (3B) y Qwen 2.5 (3B).
-* **Mejor balance global**: combinaciones `paddleocr_llama3` y `paddleocr_qwen`.
-* El enfoque con **prompts bien diseñados** resulta **más flexible y replicable** que el fine-tuning por departamento, manteniendo eficiencia y trazabilidad.
+En conjunto, el sistema se valida como una solución **replicable, escalable y de bajo costo**, adecuada para apoyar la modernización documental en municipios chilenos.
