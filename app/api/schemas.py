@@ -9,8 +9,7 @@ class OCREngineEnum(str, Enum):
 
 class LLMEngineEnum(str, Enum):
     llama = "llama"
-    qwem = "qwen"
-
+    qwen = "qwen"
 
 class OCRResponse(BaseModel):
     route: Literal["ocr", "ocr+llm"]

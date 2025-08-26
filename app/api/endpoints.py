@@ -7,6 +7,7 @@ from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse, Response
+from pdfminer.high_level import extract_text
 
 from app.core.logger import logger
 from app.core.config import settings
@@ -123,7 +124,8 @@ async def upload_file(
         elif decision["route"] == "llm":
             logger.info("El archivo contiene texto embebido. Se procesará con LLaMA")
 
-            texto = "\n".join(decision["source"]) if isinstance(decision["source"], list) else decision["source"]
+            from pdfminer.high_level import extract_text
+            texto = extract_text(tmp_path).strip()
 
             try:
                 LLMClass = LLM_ENGINES.get(llm_engine.value)
@@ -147,6 +149,7 @@ async def upload_file(
             except Exception as e:
                 logger.error(f"Error al procesar con LLaMA: {str(e)}", exc_info=True)
                 raise HTTPException(status_code=500, detail="Error al ejecutar el modelo de lenguaje")
+
 
         if generar_metricas:
             metricas = {
